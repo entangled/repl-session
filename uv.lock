@@ -644,8 +644,9 @@ wheels = [
 [[package]]
 name = "repl-session"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
+    { name = "argh" },
     { name = "msgspec" },
     { name = "pexpect" },
 ]
@@ -660,6 +661,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "argh", specifier = ">=0.30.5" },
     { name = "msgspec", specifier = ">=0.19.0" },
     { name = "pexpect", specifier = ">=4.9.0" },
 ]

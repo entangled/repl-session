@@ -1,0 +1,13 @@
+# ~/~ begin <<docs/index.md#test/lua.yml>>[init]
+#| file: test/lua.yml
+config:
+    command: "lua"
+    first_prompt: "> "
+    change_prompt: "_PROMPT = \"{key}> \""
+    next_prompt: "{key}> "
+    strip_command: true
+    strip_ansi: true
+commands:
+   - command: 6 * 7
+   - command: "\"Hello\" .. \", \" .. \"World!\""
+# ~/~ end

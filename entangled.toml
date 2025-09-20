@@ -2,6 +2,11 @@ version="2.0"
 watch_list=["docs/*.md"]
 hooks=["quarto_attributes"]
 
+[[languages]]
+name = "YAML"
+identifiers = ["yaml"]
+comment = { "open"="#" }
+
 [markers]
 open="^(?P<indent>\\s*)```(?P<properties>.*)$"
 close="^(?P<indent>\\s*)```\\s*$"

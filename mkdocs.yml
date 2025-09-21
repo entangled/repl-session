@@ -1,3 +1,10 @@
 site_name: repl-session
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+plugins:
+  - macros:
+      include_dir: .
 theme:
   name: material

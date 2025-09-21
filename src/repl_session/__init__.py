@@ -1,5 +1,5 @@
-# ~/~ begin <<docs/index.md#repl_session/__init__.py>>[init]
-#| file: repl_session/__init__.py
+# ~/~ begin <<docs/index.md#src/repl_session/__init__.py>>[init]
+#| file: src/repl_session/__init__.py
 """
 `repl-session` is a command-line tool to evaluate a given session
 in any REPL, and store the results.
@@ -24,7 +24,7 @@ import importlib.metadata
 __version__ = importlib.metadata.version("repl-session")
 # ~/~ end
 
-# ~/~ begin <<docs/index.md#input-data>>[init]
+# ~/~ begin <<README.md#input-data>>[init]
 #| id: input-data
 class ReplConfig(msgspec.Struct):
     """Configuration
@@ -50,7 +50,7 @@ class ReplConfig(msgspec.Struct):
     strip_ansi: bool = False
     timeout: float = 5.0
 # ~/~ end
-# ~/~ begin <<docs/index.md#input-data>>[1]
+# ~/~ begin <<README.md#input-data>>[1]
 #| id: input-data
 class ReplCommand(msgspec.Struct):
     """A command to be sent to the REPL.

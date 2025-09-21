@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/index.md#test/scheme.yml>>[init]
+# ~/~ begin <<README.md#test/scheme.yml>>[init]
 #| file: test/scheme.yml
 config:
     command: "scheme --eedisable"

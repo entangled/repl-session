@@ -53,21 +53,28 @@ class ReplConfig(msgspec.Struct):
 # ~/~ begin <<docs/index.md#input-data>>[1]
 #| id: input-data
 class ReplCommand(msgspec.Struct):
-    """A command to be sent to the REPL."""
+    """A command to be sent to the REPL.
+
+    Attributes:
+        command (str): the command.
+        output_type (str): MIME type of expected output.
+        output (str | None): evaluated output.
+        expected (str | None): expected output.
+    """
     command: str
-    """Output MIME type; convenient if results are later rendered."""
     output_type: str = "text/plain"
-    """Resulting output will be placed here. If this has a value before running,
-    the contents are moved to the `expected` member."""
     output: str | None = None
-    """Expected output in case of a doc-test."""
     expected: str | None = None
 
 
 class ReplSession(msgspec.Struct):
-    """Config for setting up a REPL session."""
+    """A REPL session.
+
+    Attributes:
+        config (ReplConfig): Config for setting up a REPL session.
+        commands (list[ReplCommand]): List of commands in the session.
+    """
     config: ReplConfig
-    """List of commands."""
     commands: list[ReplCommand]
 # ~/~ end
 

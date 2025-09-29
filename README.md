@@ -42,19 +42,19 @@ I like to work with [Chez Scheme](https://cisco.github.io/ChezScheme/). Suppose 
 ```yaml
 #| file: test/scheme.yml
 config:
-    command: "scheme --eedisable"
-    first_prompt: "> "
-    change_prompt: "(waiter-prompt-string \"{key}>\")"
-    next_prompt: "{key}> "
-    strip_command: true
+  command: "scheme --eedisable"
+  first_prompt: "> "
+  change_prompt: '(waiter-prompt-string "{key}>")'
+  prompt: "{key}> "
+  continuation_prompt: ""
 commands:
-   - command: (* 6 7)
-   - command: |
+  - command: (* 6 7)
+  - command: |
       (define (fac n init)
         (if (zero? n)
           init
           (fac (- n 1) (* init n)))))
-   - command: (fac 10 1)
+  - command: (fac 10 1)
 ```
 
 Passing this to `repl-session`, it will start the Chez Scheme interpreter, waiting for the `>` prompt to appear. It then changes the prompt to a generated `uuid4` code, for instance `27e87a8a-742c-4501-b05d-b05814f5a010> `. This will make sure that we can't accidentally match something else for an interactive prompt (imagine we're generating some XML!). Since commands are also echoed to standard out, we need to strip them from the resulting output. Running this should give:
@@ -76,15 +76,27 @@ This looks very similar to the previous example:
 ```yaml
 #| file: test/lua.yml
 config:
-    command: "lua"
-    first_prompt: "> "
-    change_prompt: "_PROMPT = \"{key}> \""
-    next_prompt: "{key}> "
-    strip_command: true
-    strip_ansi: true
+  command: "lua"
+  first_prompt: "> "
+  change_prompt: '_PROMPT = "{key}> "; _PROMPT2 = "{key}+ "'
+  prompt: "{key}> "
+  continuation_prompt: "{key}\\+ "
+  strip_ansi: true
 commands:
-   - command: 6 * 7
-   - command: "\"Hello\" .. \", \" .. \"World!\""
+  - command: 6 * 7
+  - command: '"Hello" .. ", " .. "World!"'
+  - command: |
+      function fac(n, m)
+          if m == nil then
+              return fac(n, 1)
+          end
+          if n == 0 then
+              return m
+          else
+              return fac(n-1, m*n)
+          end
+      end
+  - command: fac(10)
 ```
 
 The Lua REPL is not so nice. It sends ANSI escape codes and those need to be filtered out.
@@ -96,6 +108,31 @@ repl-session < test/lua.yml | jq '.commands.[].output'
 ```
 "42"
 "Hello, World!"
+```
+
+### Python
+
+The Python REPL got a revision in version 3.13, with lots of colour and ANSI codes.
+
+```yaml
+#| file: test/python.yml
+config:
+  command: python -q
+  first_prompt: ">>>"
+  change_prompt: 'import sys; sys.ps1 = "{key}>>> "; sys.ps2 = "{key}+++ "'
+  prompt: "{key}>>> "
+  continuation_prompt: "{key}\\+\\+\\+ "
+  environment:
+    NO_COLOR: "1"
+commands:
+  - command: print("Hello, World!")
+  - command: 6 * 7
+  - command: |
+      def fac(n):
+          for i in range(1, n):
+              n *= i
+          return n
+  - command: fac(10)
 ```
 
 ## Input/Output structure
@@ -119,14 +156,17 @@ class ReplConfig(msgspec.Struct):
             output; useful if the REPL echoes your input before answering.
         timeout (float): Command timeout for this session in seconds.
     """
+
     command: str
     first_prompt: str
     change_prompt: str
-    next_prompt: str
-    append_newline: bool = True
-    strip_command: bool = False
+    prompt: str
+    continuation_prompt: str | None = None
     strip_ansi: bool = False
+    environment: dict[str, str] = msgspec.field(default_factory=dict)
     timeout: float = 5.0
+
+
 ```
 
 Then, a session is a list of commands. Each command should be a UTF-8 string, and we allow to attach some meta-data like expected MIME type for the output. We can also pass an expected output in the case of a documentation test. If `output` was already given on the input, it is  moved to `expected`. This way it becomes really easy to setup regression tests on your documentation. Just rerun on the generated output file.
@@ -142,6 +182,7 @@ class ReplCommand(msgspec.Struct):
         output (str | None): evaluated output.
         expected (str | None): expected output.
     """
+
     command: str
     output_type: str = "text/plain"
     output: str | None = None
@@ -155,8 +196,11 @@ class ReplSession(msgspec.Struct):
         config (ReplConfig): Config for setting up a REPL session.
         commands (list[ReplCommand]): List of commands in the session.
     """
+
     config: ReplConfig
     commands: list[ReplCommand]
+
+
 ```
 
 ## License and contribution

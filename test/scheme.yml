@@ -1,17 +1,17 @@
 # ~/~ begin <<README.md#test/scheme.yml>>[init]
 #| file: test/scheme.yml
 config:
-    command: "scheme --eedisable"
-    first_prompt: "> "
-    change_prompt: "(waiter-prompt-string \"{key}>\")"
-    next_prompt: "{key}> "
-    strip_command: true
+  command: "scheme --eedisable"
+  first_prompt: "> "
+  change_prompt: '(waiter-prompt-string "{key}>")'
+  prompt: "{key}> "
+  continuation_prompt: ""
 commands:
-   - command: (* 6 7)
-   - command: |
+  - command: (* 6 7)
+  - command: |
       (define (fac n init)
         (if (zero? n)
           init
           (fac (- n 1) (* init n)))))
-   - command: (fac 10 1)
+  - command: (fac 10 1)
 # ~/~ end

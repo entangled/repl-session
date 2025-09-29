@@ -1,13 +1,25 @@
 # ~/~ begin <<README.md#test/lua.yml>>[init]
 #| file: test/lua.yml
 config:
-    command: "lua"
-    first_prompt: "> "
-    change_prompt: "_PROMPT = \"{key}> \""
-    next_prompt: "{key}> "
-    strip_command: true
-    strip_ansi: true
+  command: "lua"
+  first_prompt: "> "
+  change_prompt: '_PROMPT = "{key}> "; _PROMPT2 = "{key}+ "'
+  prompt: "{key}> "
+  continuation_prompt: "{key}\\+ "
+  strip_ansi: true
 commands:
-   - command: 6 * 7
-   - command: "\"Hello\" .. \", \" .. \"World!\""
+  - command: 6 * 7
+  - command: '"Hello" .. ", " .. "World!"'
+  - command: |
+      function fac(n, m)
+          if m == nil then
+              return fac(n, 1)
+          end
+          if n == 0 then
+              return m
+          else
+              return fac(n-1, m*n)
+          end
+      end
+  - command: fac(10)
 # ~/~ end

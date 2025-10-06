@@ -122,51 +122,64 @@ def repl(config: ReplConfig) -> Generator[Callable[[str], str | None]]:
         #    child.expect(key)
         _ = child.expect(prompt)
 
-        def send(msg: str) -> str | None:
-            nonlocal prompt, continuation_prompt, change_prompt_cmd
-            lines = msg.splitlines()
-            answer: list[str] = []
+        if continuation_prompt is not None:
+            def send(msg: str) -> str | None:
+                lines = msg.splitlines()
+                answer: list[str] = []
 
-            still_waiting: bool = True
-            for line in lines:
-                logging.debug("sending: %s", line)
-                _ = child.sendline(line)
-                if continuation_prompt is not None:
+                still_waiting: bool = True
+                for line in lines:
+                    logging.debug("sending: %s", line)
+                    _ = child.sendline(line)
                     logging.debug("waiting for prompt or continuation")
                     _ = child.expect(
-                        f"(?P<cont>{continuation_prompt})|(?P<norm>{prompt})"
+                        f"(?P<norm>{prompt})|(?P<cont>{continuation_prompt})"
                     )
                     if not isinstance(child.match, re.Match):
                         continue
                     if child.match.group("cont") is not None:
-                        logging.debug("continuation")
+                        logging.debug("continuation: %s -- %s", child.before, child.after)
                         still_waiting = True
                     else:
                         logging.debug("done: %s", child.before)
                         if child.before is not None:
                             answer.append(child.before)
                         still_waiting = False
-                else:
-                    logging.debug("waiting for prompt")
+
+                if still_waiting:
+                    logging.debug(f"waiting for last prompt")
+                    # _ = child.sendline("")
                     _ = child.expect(prompt)
+                    logging.debug(f"got: %s", child.before)
                     if child.before:
                         answer.append(child.before)
-                    still_waiting = False
 
-            if still_waiting:
-                _ = child.sendline("")
+                if not answer:
+                    return None
+
+                if config.strip_ansi:
+                    ansi_escape = re.compile(r"(\u001b\[|\x1B\[)[0-?]*[ -\/]*[@-~]")
+                    return ansi_escape.sub("", answer[-1].strip())
+
+                return answer[-1].strip()
+
+        else:
+            def send(msg: str) -> str | None:
+                logging.debug("sending: %s", msg)
+
+                _ = child.sendline(msg)
                 _ = child.expect(prompt)
-                if child.before:
-                    answer.append(child.before)
 
-            if not answer:
-                return None
+                answer = child.before.strip()
 
-            if config.strip_ansi:
-                ansi_escape = re.compile(r"(\u001b\[|\x1B\[)[0-?]*[ -\/]*[@-~]")
-                return ansi_escape.sub("", answer[-1].strip())
+                if not answer:
+                    return None
 
-            return answer[-1].strip()
+                if config.strip_ansi:
+                    ansi_escape = re.compile(r"(\u001b\[|\x1B\[)[0-?]*[ -\/]*[@-~]")
+                    return ansi_escape.sub("", answer)
+
+                return answer
 
         yield send
 

@@ -42,12 +42,15 @@ I like to work with [Chez Scheme](https://cisco.github.io/ChezScheme/). Suppose 
 ```yaml
 #| file: test/scheme.yml
 #| file: test/scheme.yml
+#| file: test/scheme.yml
+#| file: test/scheme.yml
+#| file: test/scheme.yml
 config:
   command: "scheme --eedisable"
   first_prompt: "> "
   change_prompt: '(waiter-prompt-string "{key}>")'
   prompt: "{key}> "
-  continuation_prompt: ""
+  # continuation_prompt: ""
 commands:
   - command: (* 6 7)
   - command: |
@@ -75,6 +78,9 @@ repl-session < test/scheme.yml | jq '.commands.[].output'
 This looks very similar to the previous example:
 
 ```yaml
+#| file: test/lua.yml
+#| file: test/lua.yml
+#| file: test/lua.yml
 #| file: test/lua.yml
 #| file: test/lua.yml
 config:
@@ -119,6 +125,9 @@ The Python REPL got a revision in version 3.13, with lots of colour and ANSI cod
 ```yaml
 #| file: test/python.yml
 #| file: test/python.yml
+#| file: test/python.yml
+#| file: test/python.yml
+#| file: test/python.yml
 config:
   command: python -q
   first_prompt: ">>>"
@@ -127,6 +136,7 @@ config:
   continuation_prompt: "{key}\\+\\+\\+ "
   environment:
     NO_COLOR: "1"
+    PYTHON_BASIC_REPL: "1"
 commands:
   - command: print("Hello, World!")
   - command: 6 * 7
@@ -143,6 +153,9 @@ commands:
 The user can configure how the REPL is called and interpreted.
 
 ```python
+#| id: input-data
+#| id: input-data
+#| id: input-data
 #| id: input-data
 #| id: input-data
 class ReplConfig(msgspec.Struct):
@@ -176,6 +189,9 @@ class ReplConfig(msgspec.Struct):
 Then, a session is a list of commands. Each command should be a UTF-8 string, and we allow to attach some meta-data like expected MIME type for the output. We can also pass an expected output in the case of a documentation test. If `output` was already given on the input, it is  moved to `expected`. This way it becomes really easy to setup regression tests on your documentation. Just rerun on the generated output file.
 
 ```python
+#| id: input-data
+#| id: input-data
+#| id: input-data
 #| id: input-data
 #| id: input-data
 class ReplCommand(msgspec.Struct):

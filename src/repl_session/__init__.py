@@ -17,6 +17,7 @@ import uuid
 import sys
 import re
 import logging
+import os
 
 import pexpect
 import msgspec
@@ -93,12 +94,13 @@ class ReplSession(msgspec.Struct):
 # ~/~ begin <<docs/index.md#repl-contextmanager>>[init]
 #| id: repl-contextmanager
 def spawn(config: ReplConfig):
+    env = dict(os.environ) | config.environment
     child: pexpect.spawn[str] = pexpect.spawn(
         config.command,
         timeout=config.timeout,
         echo=False,
         encoding="utf-8",
-        env=config.environment,
+        env=dict(os.environ) | config.environment,
     )
     return child
 
@@ -132,7 +134,7 @@ def repl(config: ReplConfig) -> Generator[Callable[[str], str | None]]:
 
                 still_waiting: bool = True
                 for line in lines:
-                    logging.debug("sending: %s", line)
+                    logging.debug("sending: '%s'", line)
                     _ = child.sendline(line)
                     logging.debug("waiting for prompt or continuation")
                     _ = child.expect(
@@ -151,7 +153,7 @@ def repl(config: ReplConfig) -> Generator[Callable[[str], str | None]]:
 
                 if still_waiting:
                     logging.debug(f"waiting for last prompt")
-                    # _ = child.sendline("")
+                    _ = child.sendline("")
                     _ = child.expect(prompt)
                     logging.debug(f"got: %s", child.before)
                     if child.before:
@@ -161,7 +163,7 @@ def repl(config: ReplConfig) -> Generator[Callable[[str], str | None]]:
                     return None
 
                 if config.strip_ansi:
-                    ansi_escape = re.compile(r"(\u001b\[|\x1B\[)[0-?]*[ -\/]*[@-~]")
+                    ansi_escape = re.compile(r"(\u001b|\x1B)(\[[0-?]*[ -\/]*[@-~]|[\>\=])")
                     return ansi_escape.sub("", answer[-1].strip())
 
                 return answer[-1].strip()
@@ -179,7 +181,7 @@ def repl(config: ReplConfig) -> Generator[Callable[[str], str | None]]:
                     return None
 
                 if config.strip_ansi:
-                    ansi_escape = re.compile(r"(\u001b\[|\x1B\[)[0-?]*[ -\/]*[@-~]")
+                    ansi_escape = re.compile(r"(\u001b|\x1B)(\[[0-?]*[ -\/]*[@-~]|[\>\=])")
                     return ansi_escape.sub("", answer)
 
                 return answer

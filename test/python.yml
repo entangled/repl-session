@@ -8,6 +8,7 @@ config:
   continuation_prompt: "{key}\\+\\+\\+ "
   environment:
     NO_COLOR: "1"
+    PYTHON_BASIC_REPL: "1"
 commands:
   - command: print("Hello, World!")
   - command: 6 * 7

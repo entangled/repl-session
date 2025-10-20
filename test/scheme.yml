@@ -5,7 +5,7 @@ config:
   first_prompt: "> "
   change_prompt: '(waiter-prompt-string "{key}>")'
   prompt: "{key}> "
-  continuation_prompt: ""
+  # continuation_prompt: ""
 commands:
   - command: (* 6 7)
   - command: |

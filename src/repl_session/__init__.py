@@ -127,6 +127,9 @@ def repl(config: ReplConfig) -> Generator[Callable[[str], str | None]]:
                 lines = msg.splitlines()
                 answer: list[str] = []
 
+                if not lines:
+                    return None
+
                 still_waiting: bool = True
                 for line in lines:
                     logging.debug("sending: %s", line)

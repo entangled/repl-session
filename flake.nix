@@ -18,15 +18,6 @@
     overlay = final: prev: {
       pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
         (python-final: python-prev: { 
-          argh = python-prev.argh.overridePythonAttrs(old: rec {
-            version = "0.30.5";
-            src = python-final.fetchPypi {
-              pname = "argh";
-              inherit version;
-              sha256 = "sha256-s339YXoJ0ZpKe8rtDgYLKIvHrI39wPrPiGpJol/zNyg=";
-            };
-            doCheck = false;
-          });
           msgspec = python-prev.msgspec.overridePythonAttrs(old: rec {
             version = "0.20.0";
             src = final.fetchFromGitHub {

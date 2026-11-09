@@ -1395,7 +1395,7 @@ name = "repl-session"
 version = "0.2.1"
 source = { editable = "." }
 dependencies = [
-    { name = "argh" },
+    { name = "click" },
     { name = "msgspec" },
     { name = "pexpect" },
 ]
@@ -1416,7 +1416,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "argh", specifier = ">=0.30.5" },
+    { name = "click", specifier = ">=8.1" },
     { name = "msgspec", specifier = ">=0.19.0" },
     { name = "pexpect", specifier = ">=4.9.0" },
 ]

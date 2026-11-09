@@ -19,14 +19,12 @@ import os
 
 import pexpect
 import msgspec
-import argh
+import click
 import importlib.metadata
 
 
 __version__ = importlib.metadata.version("repl-session")
 # ~/~ end
-
-
 # ~/~ begin <<README.md#input-data>>[init]
 class ReplConfig(msgspec.Struct):
     """Configuration
@@ -85,8 +83,6 @@ class ReplSession(msgspec.Struct):
 
 
 # ~/~ end
-
-
 # ~/~ begin <<docs/index.md#repl-contextmanager>>[init]
 def spawn(config: ReplConfig):
     env = dict(os.environ) | config.environment
@@ -170,10 +166,10 @@ def repl(config: ReplConfig) -> Generator[Callable[[str], str | None]]:
                 _ = child.sendline(msg)
                 _ = child.expect(prompt)
 
-                answer = child.before.strip()
-
-                if not answer:
+                if not child.before:
                     return None
+
+                answer = child.before.strip()
 
                 if config.strip_ansi:
                     ansi_escape = re.compile(r"(\u001b|\x1B)(\[[0-?]*[ -\/]*[@-~]|[\>\=])")
@@ -182,8 +178,6 @@ def repl(config: ReplConfig) -> Generator[Callable[[str], str | None]]:
                 return answer
 
         yield send
-
-
 # ~/~ end
 # ~/~ begin <<docs/index.md#run-session>>[init]
 def run_session(session: ReplSession):
@@ -195,8 +189,6 @@ def run_session(session: ReplSession):
             cmd.expected = expected
 
     return session
-
-
 # ~/~ end
 # ~/~ begin <<docs/index.md#io>>[init]
 def read_session(port: IO[str] = sys.stdin) -> ReplSession:
@@ -207,23 +199,20 @@ def read_session(port: IO[str] = sys.stdin) -> ReplSession:
 def write_session(session: ReplSession, port: IO[str] = sys.stdout):
     data = msgspec.json.encode(session)
     _ = port.write(data.decode())
-
-
 # ~/~ end
 
-
-@argh.arg("-v", "--version", help="show version and exit")
-@argh.arg("-l", "--log-enable", help="show debugging output")
-def repl_session(version: bool = False, log_enable: bool = False):
+@click.command()
+@click.version_option(
+    __version__, "-v", "--version",
+    prog_name="repl-session", message="%(prog)s %(version)s",
+    help="show version and exit")
+@click.option("-l", "--log-enable", is_flag=True, help="show debugging output")
+def repl_session(log_enable: bool = False):
     """
     repl-session runs a REPL session, reading JSON from standard input and
     writing to standard output. Both the input and output follow the same
     schema.
     """
-    if version:
-        print(f"repl-session {__version__}")
-        sys.exit(0)
-
     if log_enable:
         logging.basicConfig(level=logging.DEBUG)
 
@@ -231,7 +220,5 @@ def repl_session(version: bool = False, log_enable: bool = False):
 
 
 def main():
-    argh.dispatch_command(repl_session)
-
-
+    repl_session()
 # ~/~ end

@@ -179,8 +179,6 @@ class ReplConfig(msgspec.Struct):
     strip_ansi: bool = False
     environment: dict[str, str] = msgspec.field(default_factory=dict)
     timeout: float = 5.0
-
-
 ```
 
 Then, a session is a list of commands. Each command should be a UTF-8 string, and we allow to attach some meta-data like expected MIME type for the output. We can also pass an expected output in the case of a documentation test. If `output` was already given on the input, it is  moved to `expected`. This way it becomes really easy to setup regression tests on your documentation. Just rerun on the generated output file.
@@ -213,8 +211,6 @@ class ReplSession(msgspec.Struct):
 
     config: ReplConfig
     commands: list[ReplCommand]
-
-
 ```
 
 ## License and contribution

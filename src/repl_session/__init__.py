@@ -50,8 +50,6 @@ class ReplConfig(msgspec.Struct):
     strip_ansi: bool = False
     environment: dict[str, str] = msgspec.field(default_factory=dict)
     timeout: float = 5.0
-
-
 # ~/~ end
 # ~/~ begin <<README.md#input-data>>[1]
 class ReplCommand(msgspec.Struct):
@@ -80,8 +78,6 @@ class ReplSession(msgspec.Struct):
 
     config: ReplConfig
     commands: list[ReplCommand]
-
-
 # ~/~ end
 # ~/~ begin <<docs/index.md#repl-contextmanager>>[init]
 def spawn(config: ReplConfig):

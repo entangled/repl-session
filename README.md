@@ -57,7 +57,7 @@ commands:
   - command: (fac 10 1)
 ```
 
-Passing this to `repl-session`, it will start the Chez Scheme interpreter, waiting for the `>` prompt to appear. It then changes the prompt to a generated `uuid4` code, for instance `27e87a8a-742c-4501-b05d-b05814f5a010> `. This will make sure that we can't accidentally match something else for an interactive prompt (imagine we're generating some XML!). Since commands are also echoed to standard out, we need to strip them from the resulting output. Running this should give:
+Passing this to `repl-session`, it will start the Chez Scheme interpreter, waiting for the `>` prompt to appear. It then changes the prompt to a generated `uuid4` code, for instance `27e87a8a-742c-4501-b05d-b05814f5a010> `. This will make sure that we can't accidentally match something else for an interactive prompt (imagine we're generating some XML!). Running this should give:
 
 ```bash
 repl-session < test/scheme.yml | jq '.commands.[].output'
@@ -65,7 +65,7 @@ repl-session < test/scheme.yml | jq '.commands.[].output'
 
 ```
 "42"
-"(define (fac n init)\n  (if (zero? n)\n    init\n    (fac (- n 1) (* init n)))))"
+null
 "3628800"
 ```
 
@@ -108,6 +108,8 @@ repl-session < test/lua.yml | jq '.commands.[].output'
 ```
 "42"
 "Hello, World!"
+null
+"3628800"
 ```
 
 ### Python
@@ -134,6 +136,17 @@ commands:
               n *= i
           return n
   - command: fac(10)
+```
+
+```bash
+repl-session < test/python.yml | jq '.commands.[].output'
+```
+
+```
+"Hello, World!"
+"42"
+null
+"3628800"
 ```
 
 ## Input/Output structure

@@ -1,12 +1,10 @@
 # ~/~ begin <<docs/index.md#src/repl_session/__init__.py>>[init]
-#| file: src/repl_session/__init__.py
 """
 `repl-session` is a command-line tool to evaluate a given session
 in any REPL, and store the results.
 """
 
 # ~/~ begin <<docs/index.md#imports>>[init]
-#| id: imports
 # from datetime import datetime, tzinfo
 from typing import IO, cast
 from collections.abc import Generator, Callable
@@ -30,7 +28,6 @@ __version__ = importlib.metadata.version("repl-session")
 
 
 # ~/~ begin <<README.md#input-data>>[init]
-#| id: input-data
 class ReplConfig(msgspec.Struct):
     """Configuration
 
@@ -59,7 +56,6 @@ class ReplConfig(msgspec.Struct):
 
 # ~/~ end
 # ~/~ begin <<README.md#input-data>>[1]
-#| id: input-data
 class ReplCommand(msgspec.Struct):
     """A command to be sent to the REPL.
 
@@ -92,7 +88,6 @@ class ReplSession(msgspec.Struct):
 
 
 # ~/~ begin <<docs/index.md#repl-contextmanager>>[init]
-#| id: repl-contextmanager
 def spawn(config: ReplConfig):
     env = dict(os.environ) | config.environment
     child: pexpect.spawn[str] = pexpect.spawn(
@@ -191,7 +186,6 @@ def repl(config: ReplConfig) -> Generator[Callable[[str], str | None]]:
 
 # ~/~ end
 # ~/~ begin <<docs/index.md#run-session>>[init]
-#| id: run-session
 def run_session(session: ReplSession):
     with repl(session.config) as run:
         for cmd in session.commands:
@@ -205,7 +199,6 @@ def run_session(session: ReplSession):
 
 # ~/~ end
 # ~/~ begin <<docs/index.md#io>>[init]
-#| id: io
 def read_session(port: IO[str] = sys.stdin) -> ReplSession:
     data: str = port.read()
     return msgspec.yaml.decode(data, type=ReplSession)

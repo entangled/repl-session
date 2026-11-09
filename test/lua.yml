@@ -1,5 +1,4 @@
 # ~/~ begin <<README.md#test/lua.yml>>[init]
-#| file: test/lua.yml
 config:
   command: "lua"
   first_prompt: "> "

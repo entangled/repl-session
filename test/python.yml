@@ -1,5 +1,4 @@
 # ~/~ begin <<README.md#test/python.yml>>[init]
-#| file: test/python.yml
 config:
   command: python -q
   first_prompt: ">>>"

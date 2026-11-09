@@ -96,6 +96,19 @@ def spawn(config: ReplConfig):
     return child
 
 
+ANSI_ESCAPE = re.compile(r"(\u001b|\x1B)(\[[0-?]*[ -\/]*[@-~]|[\>\=])")
+
+
+def clean_output(config: ReplConfig, output: str) -> str | None:
+    """Remove ANSI escapes (if requested), normalize the CRLF line endings
+    that the pseudo-terminal produces, and trim surrounding whitespace.
+    Returns `None` if nothing is left."""
+    if config.strip_ansi:
+        output = ANSI_ESCAPE.sub("", output)
+    output = output.replace("\r\n", "\n").replace("\r", "").strip()
+    return output or None
+
+
 @contextmanager
 def repl(config: ReplConfig) -> Generator[Callable[[str], str | None]]:
     key = str(uuid.uuid4())
@@ -153,11 +166,7 @@ def repl(config: ReplConfig) -> Generator[Callable[[str], str | None]]:
                 if not answer:
                     return None
 
-                if config.strip_ansi:
-                    ansi_escape = re.compile(r"(\u001b|\x1B)(\[[0-?]*[ -\/]*[@-~]|[\>\=])")
-                    return ansi_escape.sub("", answer[-1].strip())
-
-                return answer[-1].strip()
+                return clean_output(config, answer[-1])
 
         else:
             def send(msg: str) -> str | None:
@@ -169,13 +178,7 @@ def repl(config: ReplConfig) -> Generator[Callable[[str], str | None]]:
                 if not child.before:
                     return None
 
-                answer = child.before.strip()
-
-                if config.strip_ansi:
-                    ansi_escape = re.compile(r"(\u001b|\x1B)(\[[0-?]*[ -\/]*[@-~]|[\>\=])")
-                    return ansi_escape.sub("", answer)
-
-                return answer
+                return clean_output(config, child.before)
 
         yield send
 # ~/~ end

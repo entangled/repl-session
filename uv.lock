@@ -1810,6 +1810,7 @@ dependencies = [
     { name = "click" },
     { name = "msgspec" },
     { name = "pexpect" },
+    { name = "pyyaml" },
 ]
 
 [package.optional-dependencies]
@@ -1839,6 +1840,7 @@ requires-dist = [
     { name = "jupyter-client", marker = "extra == 'jupyter'", specifier = ">=8.6" },
     { name = "msgspec", specifier = ">=0.19.0" },
     { name = "pexpect", specifier = ">=4.9.0" },
+    { name = "pyyaml", specifier = ">=6.0" },
 ]
 provides-extras = ["jupyter"]
 

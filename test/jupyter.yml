@@ -1,0 +1,19 @@
+# ~/~ begin <<docs/jupyter.md#test/jupyter.yml>>[init]
+config:
+  backend: jupyter
+  kernel: python3
+commands:
+  - command: print("Hello, World!")
+  - command: 6 * 7
+  - command: |
+      def fac(n):
+          for i in range(1, n):
+              n *= i
+          return n
+  - command: fac(10)
+  - command: |
+      from IPython.display import HTML
+      HTML("<b>Hello</b>, World!")
+    output_type: text/html
+  - command: 1 / 0
+# ~/~ end

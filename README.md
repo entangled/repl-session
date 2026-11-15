@@ -15,7 +15,7 @@ This is only really useful if you're hacking together a literate programming env
 
 The REPL of your choice is started and interacted with through the `pexpect` library. All I/O is dealt with through `msgspec`.
 
-The preferred way to solve this is by using `jupyter-client` in combination with an existing Jupyter kernel. However, not all languages have a Jupyter kernel available, and developing one takes a bit more than configuring `pexpect` for an existing REPL. I may still include Jupyter support in this application at a later stage.
+The preferred way to solve this is by using `jupyter-client` in combination with an existing Jupyter kernel. However, not all languages have a Jupyter kernel available, and developing one takes a bit more than configuring `pexpect` for an existing REPL. If a kernel is available for your language, you can use it through the optional Jupyter backend: `pip install repl-session[jupyter]`, then see [the Jupyter backend docs](https://entangled.github.io/repl-session/jupyter).
 
 ## Install
 
@@ -151,12 +151,13 @@ null
 
 ## Input/Output structure
 
-The user can configure how the REPL is called and interpreted.
+The user can configure how the REPL is called and interpreted. The `backend` field picks between this `pexpect` based REPL backend (`backend: repl`, the default) and the Jupyter backend (`backend: jupyter`).
 
 ```python
 #| id: input-data
-class ReplConfig(msgspec.Struct):
-    """Configuration
+class ReplConfig(msgspec.Struct, tag_field="backend", tag="repl"):
+    """Configuration for the `pexpect` backend; selected with `backend: repl`,
+    which is also the default when `backend` is absent.
 
     Attributes:
         command (str): Command to start the REPL
@@ -183,33 +184,61 @@ class ReplConfig(msgspec.Struct):
 
 Then, a session is a list of commands. Each command should be a UTF-8 string, and we allow to attach some meta-data like expected MIME type for the output. We can also pass an expected output in the case of a documentation test. If `output` was already given on the input, it is  moved to `expected`. This way it becomes really easy to setup regression tests on your documentation. Just rerun on the generated output file.
 
+The `output` field only holds the representation matching `output_type`. The `outputs` field records everything a command produced, in order. Each item has a `kind` (`result`, `display`, `stdout`, `stderr` or `error`) and a MIME bundle `data` with one or more representations of the same output. A Jupyter kernel may return `text/plain`, `text/html` and `image/png` together, for example. The REPL backend only sees terminal text, so it always gives a single `result`.
+
 ```python
 #| id: input-data
+OutputKind = Literal["result", "display", "stdout", "stderr", "error"]
+
+
+class ReplOutput(msgspec.Struct, omit_defaults=True):
+    """A single piece of output produced by a command.
+
+    Attributes:
+        kind (str): One of `result` (the value of the command), `display`
+            (rich output produced along the way, e.g. a plot), `stdout`,
+            `stderr` or `error` (a traceback). The `repl` backend cannot tell
+            these apart and reports everything as a single `result`.
+        data (dict[str, str]): MIME bundle: the same output in one or more
+            representations, keyed by MIME type. Binary data is base64 encoded;
+            JSON data is serialized to a string.
+        metadata (dict[str, Any]): Per MIME type metadata, e.g. image sizes.
+    """
+
+    kind: OutputKind
+    data: dict[str, str]
+    metadata: dict[str, Any] = msgspec.field(default_factory=dict)
+
+
 class ReplCommand(msgspec.Struct):
     """A command to be sent to the REPL.
 
     Attributes:
         command (str): the command.
         output_type (str): MIME type of expected output.
-        output (str | None): evaluated output.
+        output (str | None): evaluated output for `output_type`.
         expected (str | None): expected output.
+        outputs (list[ReplOutput] | None): everything the command produced, in
+            order, with all available MIME types.
     """
 
     command: str
     output_type: str = "text/plain"
     output: str | None = None
     expected: str | None = None
+    outputs: list[ReplOutput] | None = None
 
 
 class ReplSession(msgspec.Struct):
     """A REPL session.
 
     Attributes:
-        config (ReplConfig): Config for setting up a REPL session.
+        config (ReplConfig | JupyterConfig): Config for setting up a REPL
+            session, the `backend` field selects which.
         commands (list[ReplCommand]): List of commands in the session.
     """
 
-    config: ReplConfig
+    config: ReplConfig | JupyterConfig
     commands: list[ReplCommand]
 ```
 
